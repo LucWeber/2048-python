@@ -27,10 +27,11 @@ class GameGrid(Frame):
         self.grid_cells = []
         self.init_grid()
         self.matrix = logic.new_game(c.GRID_LEN)
-        self.history_matrixs = []
+        self.history_matrices = []
         self.update_grid_cells()
-
         self.mainloop()
+        for step in ['w', 's', 's']:
+            game, done = self.one_round(step)
 
     def init_grid(self):
         background = Frame(self, bg=c.BACKGROUND_COLOR_GAME,
@@ -65,17 +66,21 @@ class GameGrid(Frame):
         self.update_idletasks()
 
     def key_down(self, event):
-        key = repr(event.char)
-        if key == c.KEY_BACK and len(self.history_matrixs) > 1:
-            self.matrix = self.history_matrixs.pop()
+        try:
+            key = repr(event.char)
+        except AttributeError:
+            key = event
+
+        if key == c.KEY_BACK and len(self.history_matrices) > 1:
+            self.matrix = self.history_matrices.pop()
             self.update_grid_cells()
-            print('back on step total step:', len(self.history_matrixs))
+            print('back on step total step:', len(self.history_matrices))
         elif key in self.commands:
-            self.matrix, done = self.commands[repr(event.char)](self.matrix)
+            self.matrix, done = self.commands[key](self.matrix)
             if done:
                 self.matrix = logic.add_two(self.matrix)
                 # record last move
-                self.history_matrixs.append(self.matrix)
+                self.history_matrices.append(self.matrix)
                 self.update_grid_cells()
                 if logic.game_state(self.matrix) == 'win':
                     self.grid_cells[1][1].configure(text="You", bg=c.BACKGROUND_COLOR_CELL_EMPTY)
@@ -89,6 +94,15 @@ class GameGrid(Frame):
         while self.matrix[index[0]][index[1]] != 0:
             index = (gen(), gen())
         self.matrix[index[0]][index[1]] = 2
+
+    def one_round(self, input):
+
+
+        self.key_down(input)
+        state = self.matrix
+
+        print(state)
+        return 1, 2
 
 
 game_grid = GameGrid()
